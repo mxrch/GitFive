@@ -1,0 +1,14 @@
+httpx==0.23.0
+git+https://github.com/agronholm/anyio@70188d3#egg=anyio
+rich==12.6.0
+levenshtein==0.20.5
+Pillow==9.2.0
+beautifulsoup4==4.9.3
+python-dateutil==2.8.2
+imagehash==4.3.1
+GitPython==3.1.27
+trio==0.22.0
+googlesearch-python==1.1.0
+pwinput==1.0.2
+unidecode==1.3.6
+alive-progress==2.4.1

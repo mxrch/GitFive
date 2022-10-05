@@ -1,0 +1,211 @@
+from gitfive.lib import repos
+from gitfive.lib import close_friends
+from gitfive.lib.domain_finder import guess_custom_domain
+from gitfive.lib import emails_gen
+from gitfive.lib import metamon
+from gitfive.lib import organizations
+from gitfive.lib.utils import *
+from gitfive.lib import xray
+from gitfive.lib.objects import GitfiveRunner
+from gitfive.lib import commits
+from gitfive.lib import github
+import gitfive.config as config
+
+
+async def hunt(username: str, json_file="", runner: GitfiveRunner=None):
+    if not runner:
+        runner = GitfiveRunner()
+        await runner.login()
+
+    data = await runner.api.query(f"/users/{username}")
+    if data.get("message") == "Not Found":
+        exit(f'\n[-] User "{username}" not found.')
+
+    runner.target._scrape(data)
+
+    if runner.target.type == "Organization":
+        exit("\n[-] GitFive doesn't supports organizations yet.")
+
+    runner.rc.print("\n✍️ PROFILE", style="navajo_white1")
+
+    gist_stats = get_gists_stats(runner)
+
+    print("\n[Identifiers]")
+    print(f"Username : {runner.target.username}")
+    if runner.target.name:
+        print(f'Name : {runner.target.name}')
+    else:
+        runner.rc.print("Name : [italic]Empty")
+    print(f"ID : {runner.target.id}")
+
+    print("\n[Avatar]")
+    if runner.target.is_default_avatar:
+        print("[-] Default profile pic !")
+    else:
+        runner.rc.print("[+] Custom profile pic !", style="light_green")
+        print(f"=> {runner.target.avatar_url}")
+
+    print("\n[Status]")
+    print(f'Site Admin : {"Yes !" if runner.target.is_site_admin else "No"}')
+    print(f'Hireable : {"Yes !" if runner.target.is_hireable else "No"}')
+
+    print("\n[Social]")
+    if not (runner.target.blog or runner.target.twitter) :
+        print("Nothing to show.")
+    if runner.target.blog:
+        print(f"Site : {runner.target.blog}")
+    if runner.target.twitter:
+        print(f"Twitter : @{runner.target.twitter}")
+
+    if runner.target.company or runner.target.location or runner.target.bio:
+        print("\n[Details]")
+    if runner.target.company:
+        print(f"Employed at : {runner.target.company}")
+    if runner.target.location:
+        print(f"Location : {runner.target.location}")
+    if runner.target.bio:
+        print(f"Biography : {runner.target.bio}")
+
+
+    print("\n[Stats]")
+    print(f"Public repos : {runner.target.nb_public_repos}")
+    print(f"Followers : {runner.target.nb_followers}")
+    print(f"Following : {runner.target.nb_following}")
+
+    if runner.target.created_at or runner.target.updated_at:
+        print("\n[Account]")
+    if runner.target.created_at:
+        print(f"Account created : {runner.target.created_at.strftime('%Y/%m/%d %H:%M:%S')} (UTC)")
+    if runner.target.updated_at:
+        print(f"Last profile update : {runner.target.updated_at.strftime('%Y/%m/%d %H:%M:%S')} (UTC)")
+
+    print("\n[SSH public keys]")
+    await get_ssh_keys(runner)
+    if runner.target.ssh_keys:
+        _nb_keys = len(runner.target.ssh_keys)
+        runner.rc.print(f"[+] 🔐 Found {_nb_keys} SSH public key{'s' if _nb_keys > 1 else ''} !", style="light_green")
+        runner.rc.print("Visible in the JSON output, if specified.", style="italic")
+    else:
+        print("Nothing to show.")
+
+    print("\n[Gists]")
+    if not sum(list(gist_stats.values())):
+        print("Nothing to show.")
+    if gist_stats['gists']:
+        print(f"Gists : {gist_stats['gists']}")
+    if gist_stats['starred']:
+        print(f"Starred : {gist_stats['starred']}")
+
+    # Emails generation
+    if runner.target.company:
+        print()
+        out = guess_custom_domain(runner)
+        for company_domain in out:
+            domains = set(detect_custom_domain(company_domain))
+            for domain in domains:
+                runner.target.domains.add(company_domain)
+
+    if runner.target.blog:
+        new_custom_domain = False
+        domains = set(detect_custom_domain(runner.target.blog))
+        for domain in domains:
+            if domain not in runner.target.domains:
+                if not new_custom_domain:
+                    print()
+                    new_custom_domain = True
+                runner.rc.print(f"[+] Found possible personal domain : {domain}", style="light_green")
+                runner.target.domains.add(domain)
+
+    runner.target._add_name(runner.target.username)
+    runner.target._add_name(runner.target.twitter)
+    runner.target._add_name(runner.target.name)
+
+    runner.rc.print("\n🏭 REPOSITORIES STATS\n", style="light_salmon1")
+
+    # Targets repos
+    await repos.get_list(runner)
+    repos.show(runner)
+
+    runner.rc.print("\n🎎 CLOSE FRIENDS\n", style="deep_pink2")
+
+    # Close friends
+    runner.target.potential_friends = await close_friends.guess(runner)
+    close_friends.show(runner)
+
+    runner.rc.print("\n🏯 ORGANIZATIONS\n", style="plum2")
+
+    # Organizations
+    await organizations.scrape(runner)
+    organizations.show(runner)
+
+    if runner.target.orgs:
+        print()
+        for org in runner.target.orgs:
+            for dom in org["website_domains"]:
+                if dom not in runner.target.domains:
+                    runner.rc.print(f"Adding domain -> {dom}", style="italic")
+                    runner.target.domains.add(dom)
+            if org["email"] and "@" in org["email"]:
+                domains = detect_custom_domain(org["email"].split("@")[-1])
+                for dom in domains:
+                    if not dom in runner.target.domains:
+                        runner.rc.print(f"Adding domain -> {dom}", style="italic")
+                        runner.target.domains.update(domains)
+
+    runner.rc.print("\n🎭 IDENTITIES UNMASKING\n", style="red3")
+
+    await xray.analyze(runner)
+
+    while True:
+        emails = emails_gen.generate(runner, default_domains_list=config.emails_default_domains,
+        domain_prefixes=config.email_common_domains_prefixes)
+
+        runner.target.generated_emails.update(emails)
+
+        if not emails:
+            print("\n[-] No more emails have been generated.")
+            break # end iterations
+        runner.rc.print(f"\n[+] {len(emails)} potential email{'s' if len(emails) > 1 else ''} generated !", style="light_green")
+
+        temp_repo_name, emails_index = await metamon.start(runner, emails)
+        emails_accounts = {}
+        if emails_index:
+            emails_accounts = await commits.scrape(runner, temp_repo_name, emails_index)
+        
+        runner.target.registered_emails |= emails_accounts
+
+        new_usernames = False
+        for email, email_data in emails_accounts.items():
+            if email_data["is_target"]:
+                runner.target.emails.add(email)
+                handle = email.split("@")[0].split("+")[0]
+                if handle.lower() in {x.lower() for x in runner.target.usernames}:
+                    continue
+                if not new_usernames:
+                    print()
+                    new_usernames = True
+                runner.target._add_name(handle)
+                print(f"[+] New valid username : {handle}")
+        if new_usernames:
+            print()
+        if {x.lower() for x in runner.target.usernames} == {x.lower() for x in runner.analyzed_usernames}:
+            break # end iterations
+        new_variations = xray.near_lookup(runner)
+        if not new_variations:
+            print("[-] No more name variation have been found.")
+            break # end iterations
+        xray.near_show(runner)
+
+    # Delete
+    runner.rc.print("\n[+] Deleted the remote repo", style="italic")
+    await github.delete_repo(runner, temp_repo_name)
+    
+    if json_file:
+        import json
+        with open(json_file, "w", encoding="utf-8") as f:
+            f.write(runner.target.export_json())
+        runner.rc.print(f"[+] JSON output wrote to {json_file} !", style="italic")
+
+    runner.tmprinter.out("Deleting temp folder...")
+    from gitfive.lib.utils import delete_tmp_dir; delete_tmp_dir()
+    runner.tmprinter.clear()

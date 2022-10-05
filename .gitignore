@@ -1,0 +1,7 @@
+.google-cookie
+__pycache__/
+lib/__pycache__/
+gitfive/lib/__pycache__/
+.DS_STORE
+build/
+gitfive.egg-info/
