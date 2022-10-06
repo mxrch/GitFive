@@ -1,6 +1,6 @@
 ![](assets/banner.png)
 
-![Python minimum version](https://img.shields.io/badge/Python-3.10%2B-brightgreen) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/mxrch/gitfive/CodeQL?label=CodeQL)
+![Python minimum version](https://img.shields.io/badge/Python-3.10%2B-brightgreen)
 
 # Description
 
@@ -17,9 +17,12 @@ Main features :
 - Finds local identities (UPNs, ex : jeanpierre@My-Computer.local)
 - Finds potential secondary GitHub accounts
 - Don't needs repos to work (but better)
-- Generates every possible email address combinations and look for match
+- Generates every possible email address combinations and looks for matchs
+- Dumps SSL public keys
+- JSON export
 
 Optimizations :
+- Very low API consumption, stays under the rate-limit
 - Multi-processing tasks (bypassing Python's GIL)
 - Async scraping
 
@@ -48,6 +51,9 @@ First, login to GitHub :
 ```bash
 $ gitfive login
 ```
+
+*How to create the token : https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token \
+Only "repo" and "delete_repo" scopes are needed.*
 
 Then, profit :
 ```bash
