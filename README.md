@@ -86,7 +86,7 @@ This tool is for educational purposes only, I am not responsible for its use.
 
 ### Less obvious disclaimer
 
-The use of this tool in a paid service is strictly forbidden without my personal agreement.\
+The use of this tool in an automated paid service / software is strictly forbidden without my personal agreement.\
 Please use it only in personal, criminal investigations, or open-source projects.
 
 ## Thanks
