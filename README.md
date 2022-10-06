@@ -87,6 +87,7 @@ Please use it only in personal, criminal investigations, or open-source projects
 
 - novitae for being my Python colleague
 - rayanlecat, ABH, 22sh, BlackWasp, Tartofraise, mpgn, M3SS for the beta test
+- The HideAndSec team 💗 (blog : https://hideandsec.sh)
 
 ## You like the tool ?
 [Sponsor me](https://github.com/sponsors/mxrch) on GitHub !

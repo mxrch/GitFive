@@ -80,6 +80,7 @@ async def start(runner: GitfiveRunner, emails: List[str]):
     # To avoid conflits in the commits parsing, we set an unusable "email" for the committer
     # but only in the scope of the repo
     repo.config_writer().set_value("user", "email", "gitfive_lock").release()
+    repo.config_writer().set_value("user", "name", "gitfive_hunter").release()
 
     dummy_file_name = "dummy.txt"
     dummy_file_path = repo_path / dummy_file_name
