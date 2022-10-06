@@ -47,13 +47,10 @@ $ pipx install gitfive
 It will automatically use venvs to avoid dependency conflicts with other projects.
 
 # Usage
-First, login to GitHub :
+First, login to GitHub *(preferably with a secondary account)* :
 ```bash
 $ gitfive login
 ```
-
-*How to create the token : https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token \
-Only "repo" and "delete_repo" scopes are needed.*
 
 Then, profit :
 ```bash
