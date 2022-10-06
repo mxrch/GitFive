@@ -31,6 +31,7 @@ Optimizations :
 ![](assets/workflow.png)
 
 # Requirements
+- Git
 - Python >= 3.10
 
 # Installation
