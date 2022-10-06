@@ -15,6 +15,8 @@ setup(
     author='mxrch',
     author_email='mxrch.dev@pm.me',
     description='Track down GitHub users.',
+    long_description='GitFive is an OSINT tool designed to retrieve a maximum informations on a GitHub target.',
+    long_description_content_type='text/x-rst',
     url='https://github.com/mxrch/gitfive',
     keywords=["osint", "pentest", "cybersecurity", "investigation", "hideandsec", "malfrats"],
     entry_points={

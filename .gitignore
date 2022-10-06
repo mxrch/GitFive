@@ -4,4 +4,5 @@ lib/__pycache__/
 gitfive/lib/__pycache__/
 .DS_STORE
 build/
+dist/
 gitfive.egg-info/
