@@ -18,7 +18,7 @@ Main features :
 - Finds potential secondary GitHub accounts
 - Don't needs repos to work (but better)
 - Generates every possible email address combinations and looks for matchs
-- Dumps SSL public keys
+- Dumps SSH public keys
 - JSON export
 
 Optimizations :
