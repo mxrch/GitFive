@@ -88,8 +88,8 @@ Please use it only in personal, criminal investigations, or open-source projects
 
 ## Thanks
 
-- novitae for being my Python colleague
-- rayanlecat, ABH, 22sh, BlackWasp, Tartofraise, mpgn, M3SS for the beta test
+- [novitae](https://github.com/novitae) for being my Python colleague
+- [rayanlecat](https://twitter.com/rayanlecat), [ABH](https://twitter.com/ABHsec), [22sh](https://twitter.com/0x22sh), [BlackWasp](https://twitter.com/BlWasp_), [Tartofraise](https://twitter.com/_Tartofraise), [mpgn](https://twitter.com/mpgn_x64), [M3SS](https://twitter.com/0x4D335353) and [n1nj4sec](https://twitter.com/n1nj4sec) for the beta test
 - The HideAndSec team 💗 (blog : https://hideandsec.sh)
 
 ## You like the tool ?
