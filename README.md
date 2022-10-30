@@ -16,7 +16,7 @@ Main features :
 - Highlights emails tied to GitHub's target account
 - Finds local identities (UPNs, ex : jeanpierre@My-Computer.local)
 - Finds potential secondary GitHub accounts
-- Don't needs repos to work (but better)
+- Don't need repos to work (but better)
 - Generates every possible email address combinations and looks for matchs
 - Dumps SSH public keys
 - JSON export
