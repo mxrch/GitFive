@@ -71,6 +71,12 @@ options:
 
 *PS : plz avoid testing on torvalds or other authors of repos with 1 million commits*
 
+📄 You can also use --json with user and email modules to export in JSON ! Example :
+
+```bash
+$ gitfive user mxrch --json mxrch_data.json
+```
+
 **Have fun 🥰💞**
 
 ## Video demo
