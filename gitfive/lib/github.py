@@ -10,8 +10,10 @@ async def create_repo(runner: GitfiveRunner, repo_name: str):
 
     body = BeautifulSoup(req.text, 'html.parser')
     form = body.find('form', id='new_repository')
-    authenticity_token = [x for x in form.find_all('input') if "name" in x.attrs and x.attrs["name"] == "authenticity_token"][0].attrs["value"]
+    if not form:
+        exit(f'Couldn\'t find the form to create the repo "{repo_name}".')
 
+    authenticity_token = [x for x in form.find_all('input') if "name" in x.attrs and x.attrs["name"] == "authenticity_token"][0].attrs["value"]
     form_data = {
         "authenticity_token": authenticity_token,
         "template_repository_id": "",
@@ -35,8 +37,10 @@ async def delete_repo(runner: GitfiveRunner, repo_name: str):
 
     body = BeautifulSoup(req.text, 'html.parser')
     form = body.find('form', action=f'/{runner.creds.username}/{repo_name}/settings/delete')
-    authenticity_token = [x for x in form.find_all('input') if "name" in x.attrs and x.attrs["name"] == "authenticity_token"][0].attrs["value"]
+    if not form:
+        exit(f'Couldn\'t find the form to delete the repo "{repo_name}".')
 
+    authenticity_token = [x for x in form.find_all('input') if "name" in x.attrs and x.attrs["name"] == "authenticity_token"][0].attrs["value"]
     form_data = {
         "_method": "delete",
         "authenticity_token": authenticity_token,
@@ -61,11 +65,11 @@ async def fetch_profile_name(runner: GitfiveRunner, username: str):
     headers = {"X-Requested-With": "XMLHttpRequest", **runner.as_client.headers}
     req = await runner.as_client.get(f"https://github.com/users/{username}/hovercard", headers=headers)
     body = BeautifulSoup(req.text, 'html.parser')
-    
+
     fields = [x.text.strip() for x in body.find("section", {"aria-label": "user login and name"}).find_all("a")]
     if len(fields) < 2:
         return False
-    
+
     return fields[1]
 
 async def get_original_branch_from_commit(runner: GitfiveRunner, commit: str, username: str, repo_name: str):
@@ -80,7 +84,7 @@ async def get_commits_history_from_blob(runner: GitfiveRunner, blob_url: str):
     res = re.compile(r"github\.com\/(.*?)\/(.*?)\/blob\/(.{40})\/(.*?)$").findall(blob_url)
     if not res:
         exit(f"[-] Error : cannot get the details from this blob_url : {blob_url}")
-    
+
     username, repo_name, commit, filename = res[0]
     branch = await get_original_branch_from_commit(runner, commit, username, repo_name)
     # Keeping this function to get CNAME commits history, in the future
