@@ -2,9 +2,10 @@ import sys
 
 
 def main():
-    if (sys.version_info < (3, 10)):
+    version = sys.version_info
+    if (version < (3, 10)):
         print('[-] GitFive only works with Python 3.10+.')
-        print(f"Your current Python version : {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+        print(f'Your current Python version : {version.major}.{version.minor}.{version.micro}')
         sys.exit(1)
 
     from gitfive.lib.cli import parse_args
