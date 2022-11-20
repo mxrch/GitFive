@@ -347,6 +347,7 @@ class Target():
         self.updated_at: datetime = None
         self.avatar_url = ""
         self.is_default_avatar = True
+        self.nb_ext_contribs = 0
 
         self.potential_friends: Dict[str, Dict[str, int|bool]] = {}
         self.repos: List[Dict[str, any]] = []
@@ -360,6 +361,7 @@ class Target():
         self.ssh_keys: List[str] = []
 
         self.all_contribs: Dict[str, Dict[str, Dict[str, Dict[str, Set[str]]]]] = {}
+        self.ext_contribs: Dict[str, Dict[str, Dict[str, Dict[str, Set[str]]]]] = {}
         self.internal_contribs: Dict[str, Dict[str, Dict[str, Dict[str, Dict[str, Set[str]]]]]] = {"all": {}, "no_github": {}}
         self.usernames_history: Dict[str, Dict[str, Dict[str, Dict[str, Set[str]]]]] = {}
         self.near_names: Dict[str, Dict[str, Dict[str, Dict[str, Dict[str, Dict[str, Set[str]]]]]]] = {}

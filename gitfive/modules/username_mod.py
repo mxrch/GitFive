@@ -9,6 +9,7 @@ from gitfive.lib import xray
 from gitfive.lib.objects import GitfiveRunner
 from gitfive.lib import commits
 from gitfive.lib import github
+from gitfive.lib.xray import analyze_ext_contribs
 import gitfive.config as config
 
 
@@ -29,6 +30,10 @@ async def hunt(username: str, json_file="", runner: GitfiveRunner=None):
     runner.rc.print("\n✍️ PROFILE", style="navajo_white1")
 
     gist_stats = get_gists_stats(runner)
+
+    runner.tmprinter.out("Getting external contributions...")
+    await analyze_ext_contribs(runner)
+    runner.tmprinter.clear()
 
     print("\n[Identifiers]")
     print(f"Username : {runner.target.username}")
@@ -66,7 +71,6 @@ async def hunt(username: str, json_file="", runner: GitfiveRunner=None):
     if runner.target.bio:
         print(f"Biography : {runner.target.bio}")
 
-
     print("\n[Stats]")
     print(f"Public repos : {runner.target.nb_public_repos}")
     print(f"Followers : {runner.target.nb_followers}")
@@ -78,6 +82,20 @@ async def hunt(username: str, json_file="", runner: GitfiveRunner=None):
         print(f"Account created : {runner.target.created_at.strftime('%Y/%m/%d %H:%M:%S')} (UTC)")
     if runner.target.updated_at:
         print(f"Last profile update : {runner.target.updated_at.strftime('%Y/%m/%d %H:%M:%S')} (UTC)")
+
+    print("\n[External contributions]")
+    if runner.target.nb_ext_contribs:
+        runner.rc.print(f"[+] External contributions (commits) : {runner.target.nb_ext_contribs}", style="light_green")
+        ext_emails = [x for x in runner.target.ext_contribs if not x.endswith("users.noreply.github.com")]
+        if ext_emails:
+            print(f"Email{'s' if len(ext_emails) > 1 else ''} found :")
+            for email in ext_emails:
+                print(f"- {email}")
+        else:
+            print("No email address found.")
+        
+    else:
+        print("Nothing to show.")
 
     print("\n[SSH public keys]")
     await get_ssh_keys(runner)
