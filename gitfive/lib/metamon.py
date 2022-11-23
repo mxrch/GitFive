@@ -140,7 +140,7 @@ async def start(runner: GitfiveRunner, emails: List[str]):
     if emails_index:
         # Checking if commits have been pushed
         while True:
-            found, nb_commits = await get_commits_count(runner, f"https://github.com/{runner.creds.username}/{temp_repo_name}")
+            found, nb_commits = await get_commits_count(runner, repo_url=f"https://github.com/{runner.creds.username}/{temp_repo_name}")
             if found and nb_commits == total_commits_count:
                 break
             sleep(1)

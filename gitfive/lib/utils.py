@@ -103,9 +103,11 @@ def change_permissions(path: Path|str):
 def show_banner():
     rprint(banner)
 
-async def get_commits_count(runner: GitfiveRunner, repo_url: str):
-    req = await runner.as_client.get(repo_url)
-    body = BeautifulSoup(req.text, 'html.parser')
+async def get_commits_count(runner: GitfiveRunner, repo_url: str="", raw_body: str=""):
+    if not raw_body:
+        req = await runner.as_client.get(repo_url)
+        raw_body = req.text
+    body = BeautifulSoup(raw_body, 'html.parser')
     commits_icon_el = body.find("svg", {"class": "octicon-history"})
     if not commits_icon_el:
         return False, 0
@@ -144,7 +146,12 @@ def humanize_list(array: List[any]):
     return final
 
 def sanatize(text: str) -> str:
-    deaccented = unidecode(text, "utf-8")
+    deaccented = ""
+    try:
+        deaccented = unidecode(text, "utf-8")
+    except Exception:
+        pre_sanatize = ''.join([*filter(lambda x:x.isalpha() or x in "-. ", text)]) # kudos to @n1nj4sec
+        deaccented = unidecode(pre_sanatize, "utf-8")
     return ''.join([*filter(lambda x:x.lower() in string.ascii_lowercase+" ", deaccented)])
 
 def get_gists_stats(runner: GitfiveRunner):
@@ -178,3 +185,10 @@ def unicode_patch(txt: str):
         "à": "a"
     }
     return txt.replace(''.join([*bad_chars.keys()]), ''.join([*bad_chars.values()]))
+
+def safe_print(txt: str):
+    """
+        Escape the bad characters to avoid ANSI injections.
+        Also works for Rich printers.
+    """
+    return txt.encode("unicode_escape").decode().replace('[', '\\[')

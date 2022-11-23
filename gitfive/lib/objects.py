@@ -176,8 +176,8 @@ class Credentials():
         if req.status_code == 302:
             if req.cookies.get("logged_in") == "yes":
                 self.session = {
-                        "user_session": self._as_client.cookies["user_session"],
-                        "__Host-user_session_same_site": self._as_client.cookies["__Host-user_session_same_site"],
+                        "user_session": req.cookies["user_session"],
+                        "__Host-user_session_same_site": req.cookies["__Host-user_session_same_site"],
                         "_device_id": self._as_client.cookies["_device_id"]
                     }
                 self.save_creds()
@@ -205,8 +205,8 @@ class Credentials():
                 req = await self._as_client.post("https://github.com/sessions/verified-device", data=data)
                 if req.cookies.get("logged_in") == "yes":
                     self.session = {
-                        "user_session": self._as_client.cookies["user_session"],
-                        "__Host-user_session_same_site": self._as_client.cookies["__Host-user_session_same_site"],
+                        "user_session": req.cookies["user_session"],
+                        "__Host-user_session_same_site": req.cookies["__Host-user_session_same_site"],
                         "_device_id": self._as_client.cookies["_device_id"]
                     }
                     self.save_creds()
@@ -256,8 +256,8 @@ class Credentials():
                 print("[+] Got confirmation !")
 
                 self.session = {
-                    "user_session": self._as_client.cookies["user_session"],
-                    "__Host-user_session_same_site": self._as_client.cookies["__Host-user_session_same_site"],
+                    "user_session": req.cookies["user_session"],
+                    "__Host-user_session_same_site": req.cookies["__Host-user_session_same_site"],
                     "_device_id": self._as_client.cookies["_device_id"]
                 }
                 self.save_creds()
@@ -284,8 +284,8 @@ class Credentials():
                 req = await self._as_client.post("https://github.com/sessions/two-factor", data=data)
                 if req.cookies.get("logged_in") == "yes":
                     self.session = {
-                        "user_session": self._as_client.cookies["user_session"],
-                        "__Host-user_session_same_site": self._as_client.cookies["__Host-user_session_same_site"],
+                        "user_session": req.cookies["user_session"],
+                        "__Host-user_session_same_site": req.cookies["__Host-user_session_same_site"],
                         "_device_id": self._as_client.cookies["_device_id"]
                     }
                     self.save_creds()
@@ -347,6 +347,7 @@ class Target():
         self.updated_at: datetime = None
         self.avatar_url = ""
         self.is_default_avatar = True
+        self.nb_ext_contribs = 0
 
         self.potential_friends: Dict[str, Dict[str, int|bool]] = {}
         self.repos: List[Dict[str, any]] = []
@@ -360,6 +361,7 @@ class Target():
         self.ssh_keys: List[str] = []
 
         self.all_contribs: Dict[str, Dict[str, Dict[str, Dict[str, Set[str]]]]] = {}
+        self.ext_contribs: Dict[str, Dict[str, Dict[str, Dict[str, Set[str]]]]] = {}
         self.internal_contribs: Dict[str, Dict[str, Dict[str, Dict[str, Dict[str, Set[str]]]]]] = {"all": {}, "no_github": {}}
         self.usernames_history: Dict[str, Dict[str, Dict[str, Dict[str, Set[str]]]]] = {}
         self.near_names: Dict[str, Dict[str, Dict[str, Dict[str, Dict[str, Dict[str, Set[str]]]]]]] = {}
@@ -433,7 +435,7 @@ class GitfiveRunner():
             "social_follows": trio.CapacityLimiter(50),
             "repos_list": trio.CapacityLimiter(50),
             "commits_scrape": trio.CapacityLimiter(50),
-            "commits_fetch_avatar": trio.CapacityLimiter(4),
+            "commits_fetch_avatar": trio.CapacityLimiter(1), # https://github.com/mxrch/GitFive/issues/3#issuecomment-1321260050
             "orgs_list": trio.CapacityLimiter(50)
         }
 
