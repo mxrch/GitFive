@@ -7,7 +7,7 @@ from pathlib import Path
 import concurrent.futures
 import re
 
-from gitfive.lib.utils import unicode_patch, is_diff_low, is_local_domain
+from gitfive.lib.utils import unicode_patch, is_diff_low, is_local_domain, safe_print as sp
 from gitfive.lib.objects import GitfiveRunner
 from gitfive.lib import metamon
 from gitfive.lib import commits
@@ -148,12 +148,12 @@ def near_show(runner: GitfiveRunner):
                 found_exact = True
                 if name.lower() not in runner.target._possible_names:
                     continue
-                print(f"[+] Target's {'user' if not ' ' in name else ''}name exact match => 🙍 {name}")
+                print(f"[+] Target's {'user' if not ' ' in name else ''}name exact match => 🙍 {sp(name)}")
             elif step == "variations":
                 found_variation = True
                 if name.lower() in runner.target._possible_names:
                     continue
-                print(f"[+] Possible {'user' if not ' ' in name else ''}name variation => 🙍 {name}")
+                print(f"[+] Possible {'user' if not ' ' in name else ''}name variation => 🙍 {sp(name)}")
 
             runner.shown_near_names.add(entity_fingerprint)
 
@@ -167,7 +167,7 @@ def near_show(runner: GitfiveRunner):
                     _checks_str += f" [{'italic light_green' if _is_target else 'bold indian_red'}](🐱 Github Account -> @{gh_username})"
                 if is_local_domain(email.split("@")[-1]):
                     _checks_str += f" [bold violet](💻 Local identity)"
-                runner.rc.print(f"  📮 {email}{_checks_str}")
+                runner.rc.print(f"  📮 {sp(email)}{_checks_str}")
                 if email in runner.shown_emails:
                     runner.rc.print("    [Already shown]\n", style="bright_black")
                     already_shown = True
@@ -176,7 +176,7 @@ def near_show(runner: GitfiveRunner):
                 runner.shown_emails.add(email)
                 print(f"  Name{'s' if len(email_data['names']) > 1 else ''} tied to this email :")
                 for name2, name_data2 in email_data["names"].items():
-                    print(f"    🙍 {name2} (found in {len(name_data2['repos'])} repo{'s' if len(name_data2['repos']) > 1 else ''})")
+                    print(f"    🙍 {sp(name2)} (found in {len(name_data2['repos'])} repo{'s' if len(name_data2['repos']) > 1 else ''})")
                 
                 if not (already_shown and email == list(name_data["related_data"].keys())[-1]):
                     print()
@@ -278,10 +278,10 @@ async def analyze(runner: GitfiveRunner):
         if username.lower() == runner.target.username.lower():
             print(f"[~] Current username -> 🙍 {username}")
         else:
-            print(f"[+] Previous username -> 🙍 {username}")
+            print(f"[+] Previous username -> 🙍 {sp(username)}")
         print(f"Names history tied to this username :")
         for name, name_data in username_data["names"].items():
-            print(f"  🙍 {name} (found in {len(name_data['repos'])} repo{'s' if len(name_data['repos']) > 1 else ''})")
+            print(f"  🙍 {sp(name)} (found in {len(name_data['repos'])} repo{'s' if len(name_data['repos']) > 1 else ''})")
         print()
     if not runner.target.usernames_history:
         print("[-] No previous usernames / names found.\n")
@@ -291,14 +291,14 @@ async def analyze(runner: GitfiveRunner):
         _checks_str = ""
         if is_local_domain(email.split("@")[-1]):
             _checks_str += f" [bold violet](💻 Local identity)"
-        runner.rc.print(f"[+] Internal contributor email -> 📮 {email}{_checks_str}")
+        runner.rc.print(f"[+] Internal contributor email -> 📮 {sp(email)}{_checks_str}")
         if email in runner.shown_emails:
             runner.rc.print("    [Already shown]\n", style="bright_black")
             continue
         runner.shown_emails.add(email)
         print(f"Name{'s' if len(email_data['names']) > 1 else ''} tied to this email :")
         for name, name_data in email_data["names"].items():
-            print(f"  🙍 {name} (found in {len(name_data['repos'])} repo{'s' if len(name_data['repos']) > 1 else ''})")
+            print(f"  🙍 {sp(name)} (found in {len(name_data['repos'])} repo{'s' if len(name_data['repos']) > 1 else ''})")
         print()
     if not runner.target.internal_contribs:
         print("[-] No internal contributor identity found.\n")
@@ -322,7 +322,9 @@ async def analyze_ext_contribs(runner: GitfiveRunner):
 
     if total_count > 200:
         from math import ceil
-        middle_page = ceil(ceil(total_count/100)/2)
+        middle_page = 10 # Max page ("Only the first 1000 search results are available")
+        if total_count <= 2000:
+            middle_page = ceil(ceil(total_count/100)/2)
         data3 = await runner.api.query(f"/search/commits?q=author:{runner.target.username.lower()} -user:{runner.target.username.lower()}&per_page=100&sort=author-date&order=asc&page={middle_page}")
         results.append(data3)
 
@@ -335,7 +337,11 @@ async def analyze_ext_contribs(runner: GitfiveRunner):
             repo_name: str = item.get("repository", {}).get("full_name", {})
 
             if not email in runner.target.ext_contribs:
-                runner.target.ext_contribs[email] = {"names": {}}
+                runner.target.ext_contribs[email] = {
+                                                "names": {},
+                                                "handle": email.split("@")[0],
+                                                "domain": email.split("@")[-1]
+                                            }
             if not name in runner.target.ext_contribs[email]["names"]:
                 runner.target.ext_contribs[email]["names"][name] = {"repos": set()}
             runner.target.ext_contribs[email]["names"][name]["repos"].add(repo_name)

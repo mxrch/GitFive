@@ -37,6 +37,17 @@ def generate(runner: GitfiveRunner, custom_domains_list=[], default_domains_list
                 else:
                     usernames.add(sanatize(name.lower()))
 
+    for _, email_data in runner.target.ext_contribs.items():
+        if not (is_local_domain(email_data["domain"]) and email_data["handle"].lower() in config.local_names):
+            usernames.add(email_data["handle"].lower())
+            usernames.add(email_data["handle"].split("+")[0].lower())
+        for name in email_data["names"]:
+            if name and not (is_local_domain(email_data["domain"]) and name.lower() in config.local_names):
+                if " " in name:
+                    fullnames.add(sanatize(name.lower()))
+                else:
+                    usernames.add(sanatize(name.lower()))
+
     for name, name_data in runner.target.near_names.items():
         if name:
             if " " in name:

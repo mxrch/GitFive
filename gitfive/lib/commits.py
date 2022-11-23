@@ -1,8 +1,5 @@
-import httpx
 import trio
 from bs4 import BeautifulSoup
-import imagehash
-from PIL import Image
 from alive_progress import alive_bar
 
 
@@ -15,22 +12,31 @@ async def fetch_avatar(runner: GitfiveRunner, email: str, avatar_link: str, user
                         out: Dict[str, str|bool], check_only: bool):
     async with runner.limiters["commits_fetch_avatar"]:
         is_target = (username.lower() == runner.target.username.lower())
-        full_name = await github.fetch_profile_name(runner, username)
-        _name_str = ""
-        if full_name:
-            _name_str = f" [{full_name}]"
-        if is_target:
-            if check_only:
-                runner.rc.print(f"[+] [Target's email] 🐱 {email} -> @{username}{_name_str}", style="cyan")
-            else:
+        if check_only:            
+            if is_target:
+                runner.rc.print(f"[+] [Target's email] 🐱 {email} -> @{username}", style="cyan")
+
+            out[email] = {
+                "avatar": avatar_link,
+                "username": username,
+                "is_target": is_target
+            }
+        else:
+            full_name = await github.fetch_profile_name(runner, username)
+            _name_str = ""
+            if full_name:
+                _name_str = f" [{full_name}]"
+
+            if is_target:
                 runner.rc.print(f"[+] [TARGET FOUND] 🐱 {email} -> @{username}{_name_str}", style="green bold")
-        elif not check_only:
-            runner.rc.print(f"[+] 🐱 {email} -> @{username}{_name_str}")
-        out[email] = {
-            "avatar": avatar_link,
-            "username": username,
-            "full_name": full_name,
-            "is_target": is_target
+            else:
+                runner.rc.print(f"[+] 🐱 {email} -> @{username}{_name_str}")
+
+            out[email] = {
+                "avatar": avatar_link,
+                "full_name": full_name,
+                "username": username,
+                "is_target": is_target
             }
 
 async def fetch_commits(runner: GitfiveRunner, repo_name: str, emails_index: Dict[str, str],
@@ -73,7 +79,7 @@ async def scrape(runner: GitfiveRunner, repo_name: str, emails_index: Dict[str, 
         exit("Empty repository.")
 
     if last_hash_trigger in req.text:
-        total = int(body.select('div.Box-header strong')[0].text.replace(',', ''))
+        _, total = await get_commits_count(runner, raw_body=req.text)
         last_hash = [x for x in body.select('a') if x.text.lower() == "permalink"][0].attrs['href'].split('/')[-1]
     else:
         exit("Couldn't fetch the last hash.")

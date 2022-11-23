@@ -435,7 +435,7 @@ class GitfiveRunner():
             "social_follows": trio.CapacityLimiter(50),
             "repos_list": trio.CapacityLimiter(50),
             "commits_scrape": trio.CapacityLimiter(50),
-            "commits_fetch_avatar": trio.CapacityLimiter(4),
+            "commits_fetch_avatar": trio.CapacityLimiter(1), # https://github.com/mxrch/GitFive/issues/3#issuecomment-1321260050
             "orgs_list": trio.CapacityLimiter(50)
         }
 
