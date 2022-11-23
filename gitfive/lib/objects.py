@@ -176,8 +176,8 @@ class Credentials():
         if req.status_code == 302:
             if req.cookies.get("logged_in") == "yes":
                 self.session = {
-                        "user_session": self._as_client.cookies["user_session"],
-                        "__Host-user_session_same_site": self._as_client.cookies["__Host-user_session_same_site"],
+                        "user_session": req.cookies["user_session"],
+                        "__Host-user_session_same_site": req.cookies["__Host-user_session_same_site"],
                         "_device_id": self._as_client.cookies["_device_id"]
                     }
                 self.save_creds()
@@ -205,8 +205,8 @@ class Credentials():
                 req = await self._as_client.post("https://github.com/sessions/verified-device", data=data)
                 if req.cookies.get("logged_in") == "yes":
                     self.session = {
-                        "user_session": self._as_client.cookies["user_session"],
-                        "__Host-user_session_same_site": self._as_client.cookies["__Host-user_session_same_site"],
+                        "user_session": req.cookies["user_session"],
+                        "__Host-user_session_same_site": req.cookies["__Host-user_session_same_site"],
                         "_device_id": self._as_client.cookies["_device_id"]
                     }
                     self.save_creds()
@@ -256,8 +256,8 @@ class Credentials():
                 print("[+] Got confirmation !")
 
                 self.session = {
-                    "user_session": self._as_client.cookies["user_session"],
-                    "__Host-user_session_same_site": self._as_client.cookies["__Host-user_session_same_site"],
+                    "user_session": req.cookies["user_session"],
+                    "__Host-user_session_same_site": req.cookies["__Host-user_session_same_site"],
                     "_device_id": self._as_client.cookies["_device_id"]
                 }
                 self.save_creds()
@@ -284,8 +284,8 @@ class Credentials():
                 req = await self._as_client.post("https://github.com/sessions/two-factor", data=data)
                 if req.cookies.get("logged_in") == "yes":
                     self.session = {
-                        "user_session": self._as_client.cookies["user_session"],
-                        "__Host-user_session_same_site": self._as_client.cookies["__Host-user_session_same_site"],
+                        "user_session": req.cookies["user_session"],
+                        "__Host-user_session_same_site": req.cookies["__Host-user_session_same_site"],
                         "_device_id": self._as_client.cookies["_device_id"]
                     }
                     self.save_creds()
