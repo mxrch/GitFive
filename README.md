@@ -102,7 +102,7 @@ Please use it only in personal, criminal investigations, or open-source projects
 
 Thanks to these awesome people for supporting me !
 
-<!-- sponsors --><!-- sponsors -->
+<!-- sponsors --><a href="https://github.com/elweth-sec"><img src="https://github.com/elweth-sec.png" width="60px" alt="Elweth" /></a><a href="https://github.com/BlWasp"><img src="https://github.com/BlWasp.png" width="60px" alt="BlackWasp" /></a><a href="https://github.com/pl4nty"><img src="https://github.com/pl4nty.png" width="60px" alt="Tom Plant" /></a><a href="https://github.com/0xN0x"><img src="https://github.com/0xN0x.png" width="60px" alt="N0x" /></a><a href="https://github.com/C3n7ral051nt4g3ncy"><img src="https://github.com/C3n7ral051nt4g3ncy.png" width="60px" alt="OSINT Tactical" /></a><a href="https://github.com/rayanlecat"><img src="https://github.com/rayanlecat.png" width="60px" alt="Rayan" /></a><a href="https://github.com/ajmeese7"><img src="https://github.com/ajmeese7.png" width="60px" alt="Aaron Meese" /></a><!-- sponsors -->
 
 You like my work ?\
 [Sponsor me](https://github.com/sponsors/mxrch) on GitHub ! 🤗
