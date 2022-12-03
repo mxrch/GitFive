@@ -98,5 +98,11 @@ Please use it only in personal, criminal investigations, or open-source projects
 - [rayanlecat](https://twitter.com/rayanlecat), [ABH](https://twitter.com/ABHsec), [22sh](https://twitter.com/0x22sh), [BlackWasp](https://twitter.com/BlWasp_), [Tartofraise](https://twitter.com/_Tartofraise), [mpgn](https://twitter.com/mpgn_x64), [M3SS](https://twitter.com/0x4D335353) and [n1nj4sec](https://twitter.com/n1nj4sec) for the beta test
 - The HideAndSec team 💗 (blog : https://hideandsec.sh)
 
-## You like the tool ?
-[Sponsor me](https://github.com/sponsors/mxrch) on GitHub !
+## Sponsors
+
+Thanks to these awesome people for supporting me !
+
+<!-- sponsors --><!-- sponsors -->
+
+You like my work ?\
+[Sponsor me](https://github.com/sponsors/mxrch) on GitHub ! 🤗
