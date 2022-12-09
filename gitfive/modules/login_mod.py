@@ -8,13 +8,13 @@ async def check_and_login(clean=False):
             creds.creds_path.unlink()
             print(f"[+] Credentials file at {creds.creds_path} deleted !")
         else:
-            print(f"Credentials file at {creds.creds_path} doesn't exists, no need to delete.")
-        
+            print(f"Credentials file at {creds.creds_path} doesn't exist, no need to delete.")
+
         if creds.session_path.is_file():
             creds.session_path.unlink()
             print(f"[+] Session file at {creds.session_path} deleted !")
         else:
-            print(f"Session file at {creds.session_path} doesn't exists, no need to delete.")
+            print(f"Session file at {creds.session_path} doesn't exist, no need to delete.")
         exit()
 
     creds.load_creds()
