@@ -51,7 +51,8 @@ class Credentials():
         self.session: Dict[str, str] = {}
 
         self._as_client = httpx.AsyncClient(
-            headers=config.headers, timeout=config.timeout
+            headers=config.headers, timeout=config.timeout,
+            proxies="http://127.0.0.1:8282", verify=False # temp
         )
         
     def load_creds(self):
@@ -203,6 +204,38 @@ class Credentials():
                     "otp": otp
                 }
                 req = await self._as_client.post("https://github.com/sessions/verified-device", data=data)
+                if req.cookies.get("logged_in") == "yes":
+                    self.session = {
+                        "user_session": req.cookies["user_session"],
+                        "__Host-user_session_same_site": req.cookies["__Host-user_session_same_site"],
+                        "_device_id": self._as_client.cookies["_device_id"]
+                    }
+                    self.save_creds()
+                    print("\n[+] Logged in !")
+                    rprint(f"[italic][+] Credentials saved in {self.creds_path}")
+                    rprint(f"[italic][+] Session saved in {self.session_path}")
+                else:
+                    exit("\n[-] Wrong code, please retry.")
+            elif req.headers["location"] == "https://github.com/sessions/two-factor/app":
+                print("[*] Additional check (TOTP)")
+                self.session = {
+                        "_device_id": self._as_client.cookies["_device_id"]
+                    }
+                self.save_creds()   # We need to save the _device_id, otherwise, if user provide wrong OTP code,
+                                    # it exits and at next login, Github will say that the credentials are wrong,
+                                    # unless we provide the same device_id that initiated 2FA procedure.
+                req = await self._as_client.get("https://github.com/sessions/two-factor/app", follow_redirects=False)
+                body = bs(req.text, 'html.parser')
+                form = body.find("form", {"action": "/sessions/two-factor"})
+                authenticity_token = form.find("input", {"name": "authenticity_token"}).attrs["value"]
+                msg = form.find("div", {"class": "mt-3"}).text
+                rprint(f'[bold]🗨️ Github :[/bold] [italic]"{msg}"')
+                app_otp = pwinput("📱 Code => ")
+                data = {
+                    "authenticity_token": authenticity_token,
+                    "app_otp": app_otp
+                }
+                req = await self._as_client.post("https://github.com/sessions/two-factor", data=data)
                 if req.cookies.get("logged_in") == "yes":
                     self.session = {
                         "user_session": req.cookies["user_session"],
