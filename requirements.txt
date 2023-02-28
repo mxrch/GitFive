@@ -6,7 +6,7 @@ Pillow==9.3.0
 beautifulsoup4==4.9.3
 python-dateutil==2.8.2
 imagehash==4.3.1
-GitPython==3.1.27
+GitPython==3.1.30
 trio==0.21.0
 googlesearch-python==1.1.0
 pwinput==1.0.2
