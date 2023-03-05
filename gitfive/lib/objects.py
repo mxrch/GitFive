@@ -51,8 +51,7 @@ class Credentials():
         self.session: Dict[str, str] = {}
 
         self._as_client = httpx.AsyncClient(
-            headers=config.headers, timeout=config.timeout,
-            proxies="http://127.0.0.1:8282", verify=False # temp
+            headers=config.headers, timeout=config.timeout
         )
         
     def load_creds(self):
