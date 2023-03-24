@@ -303,7 +303,7 @@ class Credentials():
                 self.save_creds()   # We need to save the _device_id, otherwise, if user provide wrong OTP code,
                                     # it exits and at next login, Github will say that the credentials are wrong,
                                     # unless we provide the same device_id that initiated 2FA procedure.
-                req = await self._as_client.get("https://github.com/sessions/two-factor")
+                req = await self._as_client.get("https://github.com/sessions/two-factor/app", follow_redirects=True)
                 body = bs(req.text, 'html.parser')
                 authenticity_token = body.find("form", {"action": "/sessions/two-factor"}).find("input", {"name": "authenticity_token"}).attrs["value"]
                 msg = body.find("form", {"action": "/sessions/two-factor"}).find("div", {"class": "mt-3"}).text.strip().split("\n")[0]
