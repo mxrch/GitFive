@@ -7,6 +7,7 @@ from PIL import Image
 from unidecode import unidecode
 
 import os
+import re
 import stat
 import socket
 from pathlib import Path
@@ -108,7 +109,8 @@ async def get_commits_count(runner: GitfiveRunner, repo_url: str="", raw_body: s
         req = await runner.as_client.get(repo_url)
         raw_body = req.text
     body = BeautifulSoup(raw_body, 'html.parser')
-    commits_icon_el = body.find("svg", {"class": "octicon-history"})
+    # Slightly modified this line to find the correct <span> containing the commit count
+    commits_icon_el = body.find("a", {"href": re.compile(r'.*/commits/mirage$')})
     if not commits_icon_el:
         return False, 0
     nb_commits_el = commits_icon_el.findNext("span")
