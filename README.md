@@ -83,7 +83,7 @@ $ gitfive user mxrch --json mxrch_data.json
 
 ## Video demo
 
-https://user-images.githubusercontent.com/17338428/194177613-6678034a-4c8c-4240-a638-3e9aecd1904d.mp4
+https://github.com/mxrch/GitFive/assets/17338428/28a22d30-f651-483f-84e8-7fc6e00b831f
 
 ## Obvious disclaimer
 
