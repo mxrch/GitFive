@@ -66,7 +66,7 @@ async def fetch_profile_name(runner: GitfiveRunner, username: str):
     req = await runner.as_client.get(f"https://github.com/users/{username}/hovercard", headers=headers)
     body = BeautifulSoup(req.text, 'html.parser')
 
-    fields = [x.text.strip() for x in body.find("section", {"aria-label": "user login and name"}).find_all("a")]
+    fields = [x.text.strip() for x in body.find("section", {"aria-label": "User login and name"}).find_all("a")]
     if len(fields) < 2:
         return False
 
