@@ -8,7 +8,7 @@ requirements = [f"{line.split('#egg=')[-1]} @ {line}" if "#egg=" in line else li
 
 setup(
     name='gitfive',
-    version='1.1.4',
+    version='1.1.5',
     packages=find_packages(include=['gitfive', 'gitfive.*']),
     license='MPL-2.0',
     license_files = ('LICENSE.md'),
