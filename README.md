@@ -29,7 +29,7 @@ Optimizations :
 - Async scraping
 
 # Workflow
-**Click [here](https://user-images.githubusercontent.com/17338428/194182901-b062b2cf-c02c-40f0-854a-5f3c52031271.png) for a full view**
+**Click [here](https://raw.githubusercontent.com/mxrch/GitFive/master/assets/workflow.png) for a full view**
 
 <br>
 
