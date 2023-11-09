@@ -316,6 +316,9 @@ async def analyze_ext_contribs(runner: GitfiveRunner):
     runner.target.nb_ext_contribs = total_count
 
     results = [data1]
+    if total_count == None:
+        total_count = 0
+        
     if total_count > 100:
         data2 = await runner.api.query(f"/search/commits?q=author:{runner.target.username.lower()} -user:{runner.target.username.lower()}&per_page=100&sort=author-date&order=desc")
         results.append(data2)
@@ -329,22 +332,25 @@ async def analyze_ext_contribs(runner: GitfiveRunner):
         results.append(data3)
 
     for data in results:
-        for item in data.get("items"):
-            email: str = item.get("commit", {}).get("author", {}).get("email")
-            if email == "noreply@github.com": # Should never happen
-                continue
-            name: str = item.get("commit", {}).get("author", {}).get("name")
-            repo_name: str = item.get("repository", {}).get("full_name", {})
+        if data['message'] == "Validation Failed":
+            print("Validation error (Probably empty/invalid query) - skipping.\n")
+        else:
+            for item in data.get("items"):
+                email: str = item.get("commit", {}).get("author", {}).get("email")
+                if email == "noreply@github.com": # Should never happen
+                    continue
+                name: str = item.get("commit", {}).get("author", {}).get("name")
+                repo_name: str = item.get("repository", {}).get("full_name", {})
 
-            if not email in runner.target.ext_contribs:
-                runner.target.ext_contribs[email] = {
-                                                "names": {},
-                                                "handle": email.split("@")[0],
-                                                "domain": email.split("@")[-1]
-                                            }
-            if not name in runner.target.ext_contribs[email]["names"]:
-                runner.target.ext_contribs[email]["names"][name] = {"repos": set()}
-            runner.target.ext_contribs[email]["names"][name]["repos"].add(repo_name)
+                if not email in runner.target.ext_contribs:
+                    runner.target.ext_contribs[email] = {
+                                                    "names": {},
+                                                    "handle": email.split("@")[0],
+                                                    "domain": email.split("@")[-1]
+                                                }
+                if not name in runner.target.ext_contribs[email]["names"]:
+                    runner.target.ext_contribs[email]["names"][name] = {"repos": set()}
+                runner.target.ext_contribs[email]["names"][name]["repos"].add(repo_name)
 
             # Getting usernames history
             if email.endswith("@users.noreply.github.com"):
