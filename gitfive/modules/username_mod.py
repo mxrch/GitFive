@@ -32,7 +32,11 @@ async def hunt(username: str, json_file="", runner: GitfiveRunner=None):
     gist_stats = get_gists_stats(runner)
 
     runner.tmprinter.out("Getting external contributions...")
-    await analyze_ext_contribs(runner)
+    data1 = await runner.api.query(f"/search/commits?q=author:{runner.target.username.lower()} -user:{runner.target.username.lower()}&per_page=100&sort=author-date&order=asc")
+    if data1.get("message") == "Validation Failed":
+        print(f'\n[-] Failed to grab external contributions, does "{username}" have a private profile?')
+    else:
+        await analyze_ext_contribs(runner)
     runner.tmprinter.clear()
 
     print("\n[Identifiers]")
@@ -171,7 +175,7 @@ async def hunt(username: str, json_file="", runner: GitfiveRunner=None):
                         runner.target.domains.update(domains)
 
     runner.rc.print("\n🎭 IDENTITIES UNMASKING\n", style="red3")
-
+    
     await xray.analyze(runner)
 
     while True:
