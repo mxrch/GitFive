@@ -50,11 +50,14 @@ async def is_followed_or_following_a_lot(runner: GitfiveRunner, username: str):
         req = await runner.as_client.get(f"https://github.com/{username}")
         body = BeautifulSoup(req.text, 'html.parser')
 
-        followers = body.find("a", href=f"/{username}?tab=followers")
-        followers = int(followers.text.replace('k', '00').replace('.', '').split(' ')[0].strip('\n')) if followers else 0
-        following = body.find("a", href=f"/{username}?tab=following")
-        following = int(following.text.replace('k', '00').replace('.', '').split(' ')[0].strip('\n')) if following else 0
+        followers_html = body.find("a", href=f"/{username}?tab=followers") or ''
+        followers_count = (followers_html and followers_html.text).replace('k', '00').replace('.', '').split(' ')[0].strip('\n')
+        followers = int(followers_count) if followers_count else 0
 
+        following_html = body.find("a", href=f"/{username}?tab=following") or ''
+        following_count = (following_html and following_html.text).replace('k', '00').replace('.', '').split(' ')[0].strip('\n')
+        following = int(following_count) if following_count else 0
+        
         if followers >= 20 or following >= 50:
             return True
         return False
