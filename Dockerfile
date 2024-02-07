@@ -14,8 +14,8 @@ RUN python -m pip install --no-cache-dir --upgrade pip && \
 # Copy the rest of the application files
 COPY . .
 
-# Run setup.py (Replace 'run' with the appropriate command if needed)
-RUN python setup.py run
+# Run setup.py install
+RUN python setup.py install
 
 # Define the command to run the application
 CMD ["python", "./main.py"]
