@@ -1,17 +1,21 @@
 # Use a specific Python base image
- FROM python:3.10
+FROM python:3.10
 
- # Set the working directory
- WORKDIR /usr/src/app
+# Set the working directory
+WORKDIR /usr/src/app
 
- # Copy and install Python dependencies
- COPY requirements.txt ./
- RUN python -m pip install --no-cache-dir --upgrade pip && \
-     python -m pip install --no-cache-dir -r requirements.txt \
-     python3 setup.py install
+# Copy requirements and setup.py
+COPY requirements.txt setup.py ./
 
- # Copy the rest of the application files
- COPY . .
+# Install Python dependencies
+RUN python -m pip install --no-cache-dir --upgrade pip && \
+    python -m pip install --no-cache-dir -r requirements.txt
 
- # Run the application
- CMD ["python", "./main.py"]
+# Copy the rest of the application files
+COPY . .
+
+# Run setup.py (Replace 'run' with the appropriate command if needed)
+RUN python setup.py run
+
+# Define the command to run the application
+CMD ["python", "./main.py"]
