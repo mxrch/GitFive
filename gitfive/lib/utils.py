@@ -199,11 +199,11 @@ def safe_print(txt: str):
 def show_version():
     new_version, new_metadata = check_new_version()
     co = Console(highlight=False)
-    co.print(f"> GHunt {current_version.metadata.get('version', '')} ({current_version.metadata.get('name', '')}) <".center(62), style="bold")
+    co.print(f"> GitFive {current_version.metadata.get('version', '')} ({current_version.metadata.get('name', '')}) <".center(62), style="bold")
     print()
     if new_version:
         co.print(f"🥳 New version {new_metadata.get('version', '')} ({new_metadata.get('name', '')}) is available !", style="bold red")
-        co.print(f"🤗 Run 'pipx upgrade ghunt' to update.", style="bold light_pink3")
+        co.print(f"🤗 Run 'pipx upgrade gitfive' to update.", style="bold light_pink3")
     else:
         co.print("🎉 You are up to date !", style="light_pink3")
 
