@@ -9,7 +9,8 @@ def main():
         sys.exit(1)
 
     from gitfive.lib.cli import parse_args
-    from gitfive.lib.utils import show_banner
+    from gitfive.lib.utils import show_banner, show_version
 
     show_banner()
+    show_version()
     parse_args()

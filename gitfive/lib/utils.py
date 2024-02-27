@@ -15,10 +15,13 @@ from dateutil.relativedelta import *
 from typing import *
 from io import BytesIO
 import string
+from packaging.version import parse as parse_version
+import json
 
 import gitfive.config as config
 from gitfive.lib.objects import GitfiveRunner
 from gitfive.lib.banner import banner
+from gitfive import version as current_version
 
 
 def is_local_domain(domain: str):
@@ -108,15 +111,12 @@ async def get_commits_count(runner: GitfiveRunner, repo_url: str="", raw_body: s
     if not raw_body:
         req = await runner.as_client.get(repo_url)
         raw_body = req.text
-    body = BeautifulSoup(raw_body, 'html.parser')
     # Slightly modified this line to find the correct <span> containing the commit count
-    commits_icon_el = body.find("a", {"href": re.compile(r'.*/commits/mirage$')})
-    if not commits_icon_el:
+    matches = re.findall(r'"commitCount":"(.*?)"', raw_body)
+    if not matches:
         return False, 0
-    nb_commits_el = commits_icon_el.findNext("span")
-    if not nb_commits_el:
-        return False, 0
-    nb_commits_str = nb_commits_el.text.split()[0].replace(",", "")
+    nb_commits_str = matches[0].replace(",", "")
+
     if nb_commits_str == "∞":
         return True, 50000 # Temporary limit, because GitHub hasn't liked my 70k commits
     nb_commits = int(nb_commits_str)
@@ -194,3 +194,32 @@ def safe_print(txt: str):
         Also works for Rich printers.
     """
     return txt.encode("unicode_escape").decode().replace('[', '\\[')
+
+def show_version():
+    new_version, new_metadata = check_new_version()
+    print()
+    rprint(f"> GitFive {current_version.metadata.get('version', '')} ({current_version.metadata.get('name', '')}) <".center(53), style="bold")
+    print()
+    if new_version:
+        rprint(f"🥳 New version {new_metadata.get('version', '')} ({new_metadata.get('name', '')}) is available !", style="bold red")
+        rprint(f"🤗 Run 'pipx upgrade gitfive' to update.", style="bold light_pink3")
+    else:
+        rprint("🎉 You are up to date !", style="light_pink3")
+
+
+def check_new_version() -> tuple[bool, dict[str, str]]:
+    """
+        Checks if there is a new version of GitFive available.
+    """
+    req = httpx.get("https://raw.githubusercontent.com/mxrch/GitFive/master/gitfive/version.py")
+    if req.status_code != 200:
+        return False, {}
+
+    raw = req.text.strip().removeprefix("metadata = ")
+    data = json.loads(raw)
+    new_version = data.get("version", "")
+    new_name = data.get("name", "")
+
+    if parse_version(new_version) > parse_version(current_version.metadata.get("version", "")):
+        return True, {"version": new_version, "name": new_name}
+    return False, {}

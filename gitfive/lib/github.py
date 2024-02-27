@@ -7,17 +7,18 @@ from gitfive.lib.objects import GitfiveRunner
 
 
 async def create_repo(runner: GitfiveRunner, repo_name: str):
-    # Slightly modified the form_data so that they will be sent as multipart/form-data
-    form_data = {
-        "template_repository_id": (None, b"", None),
-        "owner": (None, runner.creds.username.encode(), None),
-        "include_all_branches": (None, b"0", None),
-        "repository[name]": (None, repo_name.encode(), None),
-        "repository[description]": (None, b"", None),
-        "repository[visibility]": (None, b"private", None),
-        "repository[auto_init]": (None, b"0", None),
-        "repository[gitignore_template]": (None, b"", None),
-        "repository[license_template]": (None, b"", None)
+    data = {
+        "owner": runner.creds.username,
+        "template_repository_id": "",
+        "include_all_branches": "0",
+        "repository": {
+            "name": repo_name,
+            "visibility": "private",
+            "description": "",
+            "auto_init": "0",
+            "license_template": "",
+            "gitignore_template": ""
+        }
     }
 
     # Adding some headers that are now required to create a repository
@@ -25,8 +26,7 @@ async def create_repo(runner: GitfiveRunner, repo_name: str):
     updated_headers["Github-Verified-Fetch"] = "true"
     updated_headers["Origin"] = "https://github.com"
 
-    # Sending the form data as "files" to produce a multipart/form-data POST request
-    req = await runner.as_client.post("https://github.com/repositories", files=form_data, headers=updated_headers)
+    req = await runner.as_client.post("https://github.com/repositories", json=data, headers=updated_headers)
     if req.status_code in [200, 302]:
         return True
     exit(f'Couldn\'t create repo "{repo_name}".\nResponse code : {req.status_code}\nResponse text : {req.text}')

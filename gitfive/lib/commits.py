@@ -1,5 +1,6 @@
 import trio
 from bs4 import BeautifulSoup
+import json
 from alive_progress import alive_bar
 
 
@@ -49,28 +50,31 @@ async def fetch_commits(runner: GitfiveRunner, repo_name: str, emails_index: Dic
 
         if req.status_code == 429:
             exit(f'Rate-limit detected, please adjust the CapacityLimiter.\nCurrent CapacityLimiter : {runner.limiters["commits_scrape"]}')
-        body = BeautifulSoup(req.text, 'html.parser')
 
-        commits = body.find_all("li", {"class": "js-commits-list-item"})
+        commits_matches = re.findall(r'data-target="react-app\.embeddedData">({.*?})<\/script>', req.text)
+        commits = json.loads(commits_matches[0])["payload"]["commitGroups"][0]["commits"]
         
         async with trio.open_nursery() as nursery:
             for commit in commits:
-                hexsha = commit.find("a", {"class": "js-navigation-open"}).attrs["href"].split("/")[-1]
-                avatar = commit.find("img", {"class": "avatar-user"})
-                if not avatar:
+                authors = commit["authors"]
+                if len(authors) < 2:
                     continue
+                target_authors = [x for x in authors if x["displayName"] != "gitfive_hunter" and x["login"]]
+                if not target_authors:
+                    continue
+                target_author = target_authors[0]
 
+                hexsha = commit["oid"]
                 email = emails_index[hexsha]
-                avatar_link = avatar.get("src")
-                username = avatar.get("alt")[1:] # We remove the "@" at the beginning
+
+                avatar_link = target_author["avatarUrl"]
+                username = target_author["login"]
                 
                 nursery.start_soon(fetch_avatar, runner, email, avatar_link, username, out, check_only)
 
 async def scrape(runner: GitfiveRunner, repo_name: str, emails_index: Dict[str, str], check_only=False):
     out = {}
     total = 0
-    last_hash_trigger = f"/{runner.creds.username}/{repo_name}/tree/"
-    last_hash = ""
 
     req = await runner.as_client.get(f"https://github.com/{runner.creds.username}/{repo_name}")
     body = BeautifulSoup(req.text, 'html.parser')
@@ -78,9 +82,11 @@ async def scrape(runner: GitfiveRunner, repo_name: str, emails_index: Dict[str, 
     if is_repo_empty(body):
         exit("Empty repository.")
 
-    if last_hash_trigger in req.text:
+    last_hash_matches = re.findall(r'"currentOid":"(.*?)"', req.text)
+
+    if last_hash_matches:
         _, total = await get_commits_count(runner, raw_body=req.text)
-        last_hash = [x for x in body.select('a') if x.text.lower() == "permalink"][0].attrs['href'].split('/')[-1]
+        last_hash = last_hash_matches[0]
     else:
         exit("Couldn't fetch the last hash.")
 

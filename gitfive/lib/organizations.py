@@ -40,7 +40,8 @@ async def github_pages_check(runner: GitfiveRunner, github_pages: Dict[str, any]
             github_pages["activated"] = True
             github_pages["link"] = repo_name
         if not is_repo_empty(body):
-            default_branch = b64decode(body.find("ref-selector").attrs["default-branch"]).decode()
+            default_branch_matches = re.findall(r',"defaultBranch":"(.*?)","', req.text)
+            default_branch = default_branch_matches[0]
             cname_file = f"https://raw.githubusercontent.com/{org_name}/{repo_name}/{default_branch}/CNAME"
             req = await runner.as_client.get(cname_file)
             if req.status_code == 200:
