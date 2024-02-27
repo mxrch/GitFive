@@ -57,7 +57,7 @@ async def is_followed_or_following_a_lot(runner: GitfiveRunner, username: str):
         following_html = body.find("a", href=f"/{username}?tab=following") or ''
         following_count = (following_html and following_html.text).replace('k', '00').replace('.', '').split(' ')[0].strip('\n')
         following = int(following_count) if following_count else 0
-
+        
         if followers >= 20 or following >= 50:
             return True
         return False
