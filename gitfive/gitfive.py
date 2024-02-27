@@ -13,4 +13,5 @@ def main():
 
     show_banner()
     show_version()
+    print()
     parse_args()
