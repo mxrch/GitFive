@@ -6,3 +6,4 @@ gitfive/lib/__pycache__/
 build/
 dist/
 gitfive.egg-info/
+venv/

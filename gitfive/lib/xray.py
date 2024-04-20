@@ -315,18 +315,24 @@ async def analyze_ext_contribs(runner: GitfiveRunner):
     total_count = data1.get("total_count")
     runner.target.nb_ext_contribs = total_count
 
-    results = [data1]
-    if total_count > 100:
-        data2 = await runner.api.query(f"/search/commits?q=author:{runner.target.username.lower()} -user:{runner.target.username.lower()}&per_page=100&sort=author-date&order=desc")
-        results.append(data2)
 
-    if total_count > 200:
-        from math import ceil
-        middle_page = 10 # Max page ("Only the first 1000 search results are available")
-        if total_count <= 2000:
-            middle_page = ceil(ceil(total_count/100)/2)
-        data3 = await runner.api.query(f"/search/commits?q=author:{runner.target.username.lower()} -user:{runner.target.username.lower()}&per_page=100&sort=author-date&order=asc&page={middle_page}")
-        results.append(data3)
+    results = [data1]
+    # need to test against private profile
+    # Reported behavior: Throws type error on comparison
+    # Expect now: If type is none, pass over all references and continue
+    # Test results: not tested yet
+    if total_count is not None:
+        if total_count > 100:
+            data2 = await runner.api.query(f"/search/commits?q=author:{runner.target.username.lower()} -user:{runner.target.username.lower()}&per_page=100&sort=author-date&order=desc")
+            results.append(data2)
+
+        if total_count > 200:
+            from math import ceil
+            middle_page = 10 # Max page ("Only the first 1000 search results are available")
+            if total_count <= 2000:
+                middle_page = ceil(ceil(total_count/100)/2)
+            data3 = await runner.api.query(f"/search/commits?q=author:{runner.target.username.lower()} -user:{runner.target.username.lower()}&per_page=100&sort=author-date&order=asc&page={middle_page}")
+            results.append(data3)
 
     for data in results:
         for item in data.get("items"):
