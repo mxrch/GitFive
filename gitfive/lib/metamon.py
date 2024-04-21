@@ -124,10 +124,15 @@ async def start(runner: GitfiveRunner, emails: List[str]):
         print(f"[METAMON] 🐙 Added commits in {round(time.time() - part_start, 2)}s !\n")
 
         # Checking if repo is created
+        # If error 500, prints short summary. Need to test to determine "HTML response text" and exclude it w/ testing.
+        # Also implements a 5s retry-after instead of default 1s by prepending 4s wait.
         while True:
             req = await runner.as_client.get(f"https://github.com/{runner.creds.username}/{temp_repo_name}/settings")
             if req.status_code == 200:
                 break
+            elif req.status_code == 500:
+                print("[METAMON] 🐙 Error 500: retrying after 5s.")
+                sleep(4)
             sleep(1)
 
         runner.tmprinter.out("[METAMON] 🐙 Pushing...")
