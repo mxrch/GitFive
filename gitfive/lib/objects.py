@@ -306,7 +306,24 @@ class Credentials():
                                     # unless we provide the same device_id that initiated 2FA procedure.
                 req = await self._as_client.get("https://github.com/sessions/two-factor")
                 body = bs(req.text, 'html.parser')
-                authenticity_token = body.find("form", {"action": "/sessions/two-factor"}).find("input", {"name": "authenticity_token"}).attrs["value"]
+
+                #authenticity_token = body.find("form", {"action": "/sessions/two-factor"}).find("input", {"name": "authenticity_token"}).attrs["value"]
+                
+                form = body.find("form", {"action": "/sessions/two-factor"})
+                if form is None:
+                    # Handle the absence of the expected form in the HTML
+                    # This could involve logging an error or raising an exception
+                    raise ValueError("The form with action '/sessions/two-factor' was not found in the HTML content.")
+
+                authenticity_token_input = form.find("input", {"name": "authenticity_token"})
+                if authenticity_token_input is None:
+                    # Handle the absence of the input field within the form
+                    # This could involve logging an error or raising an exception
+                    raise ValueError("The input field with name 'authenticity_token' was not found in the form.")
+
+                authenticity_token = authenticity_token_input.attrs["value"]
+                
+                
                 msg = body.find("form", {"action": "/sessions/two-factor"}).find("div", {"class": "mt-3"}).text.strip().split("\n")[0]
                 rprint(f'[bold]🗨️ Github :[/bold] [italic]"{msg}"')
                 otp = pwinput("📱 Code => ")
