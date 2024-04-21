@@ -333,6 +333,8 @@ async def analyze_ext_contribs(runner: GitfiveRunner):
                 middle_page = ceil(ceil(total_count/100)/2)
             data3 = await runner.api.query(f"/search/commits?q=author:{runner.target.username.lower()} -user:{runner.target.username.lower()}&per_page=100&sort=author-date&order=asc&page={middle_page}")
             results.append(data3)
+    else:
+        raise Exception("User Profile private/not found.")
 
     for data in results:
         for item in data.get("items"):
