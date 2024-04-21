@@ -27,8 +27,16 @@ async def create_repo(runner: GitfiveRunner, repo_name: str):
     updated_headers["Origin"] = "https://github.com"
 
     req = await runner.as_client.post("https://github.com/repositories", json=data, headers=updated_headers)
+    # Nonspecific issue - additional bandaid in case prior fix doesn't work. Testing will reveal which is kept.
     if req.status_code in [200, 302]:
         return True
+    elif req.status_code == 500:
+        print(f'Couldn\'t create repo "{repo_name}".\nResponse code : {req.status_code}\nInteral Server Error.')
+        print("Retrying after 5s...")
+        sleep(5)
+        req = await runner.as_client.post("https://github.com/repositories", json=data, headers=updated_headers)
+        if req.status_code in [200, 302]:
+            return True
     exit(f'Couldn\'t create repo "{repo_name}".\nResponse code : {req.status_code}\nResponse text : {req.text}')
 
 
