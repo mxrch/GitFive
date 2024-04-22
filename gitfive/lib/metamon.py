@@ -126,17 +126,24 @@ async def start(runner: GitfiveRunner, emails: List[str]):
         # Checking if repo is created
         # If error 500, prints short summary. Need to test to determine "HTML response text" and exclude it w/ testing.
         # Also implements a 5s retry-after instead of default 1s by prepending 4s wait.
+        # Implements a "500 counter", aborts on 5 failures due to 500 to prevent a hang from infinite loop.
+        err_ctr = 0
         while True:
             req = await runner.as_client.get(f"https://github.com/{runner.creds.username}/{temp_repo_name}/settings")
             if req.status_code == 200:
                 break
             elif req.status_code == 500:
                 print("[METAMON] 🐙 Error 500: retrying after 5s.")
+                err_ctr += 1
+                if err_ctr >= 5:
+                    print("[METAMON] 🐙 Error 500: Retry exceeded. Unable to push.")
+                    print("[METAMON] 🐙 Error 500: Quitting push attempt. Check authentication/github status?")
+                    break
                 sleep(4)
             sleep(1)
-
-        runner.tmprinter.out("[METAMON] 🐙 Pushing...")
-        repo.git.push('--set-upstream', repo.remote().name, 'mirage')
+        if err_ctr < 5:
+            runner.tmprinter.out("[METAMON] 🐙 Pushing...")
+            repo.git.push('--set-upstream', repo.remote().name, 'mirage')
     else:
         print("[METAMON] 🐙 No email found in commits.\n")
 
