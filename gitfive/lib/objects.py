@@ -32,6 +32,58 @@ class TMPrinter():
     def clear(self):
         self.rc.print(" " * self.max_len, end="\r")
 
+# import logging
+
+# class TwoFactorAuthentication:
+#     def __init__(self, client):
+#         self.client = client  
+#         self.logger = logging.getLogger(__name__)
+
+#     async def fetch_2fa_form(self, url):
+#         try:
+#             response = await self.client.get(url)
+#             response.raise_for_status()
+#             return response.text
+#         except httpx.HTTPStatusError as e:
+#             self.logger.error(f"HTTP error occurred: {e}")
+#             raise
+#         except httpx.RequestError as e:
+#             self.logger.error(f"Request error occurred: {e}")
+#             raise
+
+#     def parse_form(self, html_content):
+#         soup = bs(html_content, 'html.parser')
+#         form = soup.find("form", {"action": "/sessions/two-factor"})
+#         if form is None:
+#             self.logger.warning("The form with action '/sessions/two-factor' was not found.")
+#             raise ValueError("The form with action '/sessions/two-factor' was not found in the HTML content.")
+
+#         authenticity_token_input = form.find("input", {"name": "authenticity_token"})
+#         if authenticity_token_input is None:
+#             self.logger.warning("Authenticity token input not found.")
+#             raise ValueError("The input field with name 'authenticity_token' was not found in the form.")
+
+#         return authenticity_token_input.attrs["value"]
+
+#     async def submit_2fa_code(self, authenticity_token, code):
+#         data = {
+#             "authenticity_token": authenticity_token,
+#             "otp": code  # might need to be changed depending on the form's requirements
+#         }
+#         try:
+#             response = await self.client.post("https://github.com/sessions/two-factor", data=data)
+#             response.raise_for_status()
+#             if "logged_in" in response.cookies and response.cookies["logged_in"] == "yes":
+#                 return True
+#             else:
+#                 return False
+#         except httpx.HTTPStatusError as e:
+#             self.logger.error(f"Failed to submit 2FA code, HTTP error: {e}")
+#             raise
+#         except httpx.RequestError as e:
+#             self.logger.error(f"Network error when submitting 2FA code: {e}")
+#             raise
+
 class Credentials():
     """
         Manages GitHub authentication.
@@ -53,6 +105,9 @@ class Credentials():
         self._as_client = httpx.AsyncClient(
             # headers=config.headers, timeout=config.timeout, proxies="http://127.0.0.1:8282", verify=False
             headers=config.headers, timeout=config.timeout
+
+        # self.async_client = async_client
+        # self.twofa_handler = TwoFactorAuthentication(self.async_client)
         )
         
     def load_creds(self):
