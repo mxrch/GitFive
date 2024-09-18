@@ -11,7 +11,6 @@ def guess_custom_domain(runner: GitfiveRunner):
     company = runner.target.company.lower()
 
     google = None
-    hunter = None
 
     # Google
     try:
