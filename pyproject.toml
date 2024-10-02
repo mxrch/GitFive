@@ -1,6 +1,6 @@
 [project]
 name = "gitfive"
-version = "1.1.9"
+version = "1.1.10"
 authors = [
     {name = "mxrch", email = "mxrch.dev@pm.me"},
 ]
@@ -17,7 +17,7 @@ keywords=["osint", "pentest", "cybersecurity", "investigation", "hideandsec", "m
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
 
-[project.scripts]
+[tool.poetry.scripts]
 gitfive = "gitfive.gitfive:main"
 
 [tool.setuptools.packages.find]
@@ -31,7 +31,7 @@ include = ["gitfive", "gitfive.*"]
 
 [tool.poetry]
 name = "gitfive"
-version = "1.1.9"
+version = "1.1.10"
 description = "Track down GitHub users."
 authors = ["mxrch <mxrch.dev@pm.me>"]
 license = "MPL-2.0"
