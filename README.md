@@ -4,6 +4,8 @@
 
 ![Python minimum version](https://img.shields.io/badge/Python-3.10%2B-brightgreen)
 
+#### 🐍 Now Python 3.13 compatible !
+
 # Description
 
 GitFive is an OSINT tool to investigate GitHub profiles.

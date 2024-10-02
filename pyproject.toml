@@ -1,6 +1,6 @@
 [project]
 name = "gitfive"
-version = "1.1.8"
+version = "1.1.9"
 authors = [
     {name = "mxrch", email = "mxrch.dev@pm.me"},
 ]
@@ -31,7 +31,7 @@ include = ["gitfive", "gitfive.*"]
 
 [tool.poetry]
 name = "gitfive"
-version = "1.1.8"
+version = "1.1.9"
 description = "Track down GitHub users."
 authors = ["mxrch <mxrch.dev@pm.me>"]
 license = "MPL-2.0"
