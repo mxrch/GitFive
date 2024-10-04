@@ -1,6 +1,5 @@
 import sys
 
-
 def main():
     version = sys.version_info
     if (version < (3, 10)):
