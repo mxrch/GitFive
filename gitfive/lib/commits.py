@@ -42,18 +42,30 @@ async def fetch_avatar(runner: GitfiveRunner, email: str, avatar_link: str, user
 
 async def fetch_commits(runner: GitfiveRunner, repo_name: str, emails_index: Dict[str, str],
                         last_hash: str, page: int, out: Dict[str, str|bool], check_only: bool):
+    
+    retries = 3
+    delay = 2
+
     async with runner.limiters["commits_scrape"]:
-        if page == 0:
-            req = await runner.as_client.get(f"https://github.com/{runner.creds.username}/{repo_name}/commits/mirage")
-        else:
-            req = await runner.as_client.get(f"https://github.com/{runner.creds.username}/{repo_name}/commits/mirage?after={last_hash}+{page}&branch=mirage")
+        for attempt in range(retries):
+            try:
+                if page == 0:
+                    req = await runner.as_client.get(f"https://github.com/{runner.creds.username}/{repo_name}/commits/mirage")
+                else:
+                    req = await runner.as_client.get(f"https://github.com/{runner.creds.username}/{repo_name}/commits/mirage?after={last_hash}+{page}&branch=mirage")
+                break
+            except httpx.ConnectError:
+                if attempt < retries - 1:
+                    await trio.sleep(delay * (2 ** attempt))
+                else:
+                    exit("Failed to scrape commits due to a connection error.")
 
         if req.status_code == 429:
-            exit(f'Rate-limit detected, please adjust the CapacityLimiter.\nCurrent CapacityLimiter : {runner.limiters["commits_scrape"]}')
+            exit(f'Rate-limit detected, please adjust the CapacityLimiter.\nCurrent CapacityLimiter: {runner.limiters["commits_scrape"]}')
 
         commits_matches = re.findall(r'data-target="react-app\.embeddedData">({.*?})<\/script>', req.text)
         commits = json.loads(commits_matches[0])["payload"]["commitGroups"][0]["commits"]
-        
+
         async with trio.open_nursery() as nursery:
             for commit in commits:
                 authors = commit["authors"]
@@ -65,12 +77,13 @@ async def fetch_commits(runner: GitfiveRunner, repo_name: str, emails_index: Dic
                 target_author = target_authors[0]
 
                 hexsha = commit["oid"]
-                email = emails_index[hexsha]
+                email = emails_index.get(hexsha)
 
                 avatar_link = target_author["avatarUrl"]
                 username = target_author["login"]
-                
+
                 nursery.start_soon(fetch_avatar, runner, email, avatar_link, username, out, check_only)
+
 
 async def scrape(runner: GitfiveRunner, repo_name: str, emails_index: Dict[str, str], check_only=False):
     out = {}
