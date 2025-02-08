@@ -1,0 +1,62 @@
+import unittest
+from unittest.mock import patch, AsyncMock
+from gitfive.lib.objects import Credentials  
+
+class Test2FA(unittest.TestCase):
+    @patch('gitfive.lib.objects.httpx.AsyncClient.get')
+    @patch('gitfive.lib.objects.httpx.AsyncClient.post')
+    async def test_login_with_2fa_success(self, mock_post, mock_get):
+        # initial login page request
+        mock_get.return_value = AsyncMock(text='<html><form action="/session"><input name="authenticity_token" value="initial_token"/></form></html>')
+        
+        # successful login submission response with a 2FA challenge
+        mock_post.side_effect = [
+            AsyncMock(status_code=302, cookies={"logged_in": ""}, headers={"location": "https://github.com/sessions/two-factor"}),
+            AsyncMock(status_code=200, cookies={"logged_in": "yes"})  # Mock the 2FA submission response
+        ]
+        
+        # 2FA page request with the form
+        mock_get.side_effect = [
+            AsyncMock(text='<html><form action="/session"><input name="authenticity_token" value="initial_token"/></form></html>'),
+            AsyncMock(text='<html><form action="/sessions/two-factor"><input name="authenticity_token" value="2fa_token"/></form></html>')
+        ]
+
+        # simulate user entering the 2FA code
+        with patch('gitfive.objects.pwinput', return_value='123456'):
+            creds = Credentials()
+            await creds.login()
+            
+            # verify the session is saved and the logged_in cookie is set to yes
+            self.assertEqual(creds.session.get("logged_in"), "yes")
+
+        # simulate user entering incorrect 2FA code
+        with patch('gitfive.lib.objects.pwinput', return_value='wrong_code'):
+            creds = Credentials()
+            with self.assertRaises(Exception) as context:
+                await creds.login()
+            
+            # check correct exception is raised for incorrect 2FA token
+            self.assertTrue("2FA token is incorrect" in str(context.exception))
+
+    @patch('gitfive.lib.objects.httpx.AsyncClient.get')
+    @patch('gitfive.lib.objects.httpx.AsyncClient.post')
+    async def test_expired_2fa_token(self, mock_post, mock_get):
+        """Test handling of expired 2FA token."""
+        mock_get.return_value = AsyncMock(text=self.auth_form_html)
+        # simulate server response for expired 2FA token
+        mock_post.side_effect = [
+            AsyncMock(status_code=302, headers={"location": "https://github.com/sessions/two-factor"}),  # redirect to 2FA page
+            AsyncMock(status_code=408)  # request Timeout status bc expired token
+        ]
+        
+        # simulate user entering expired 2FA code
+        with patch('gitfive.lib.objects.pwinput', return_value='expired_code'):
+            creds = Credentials()
+            with self.assertRaises(Exception) as context:
+                await creds.login()
+            
+            # check appropriate message indicating token expiration
+            self.assertTrue("2FA token has expired" in str(context.exception))
+
+if __name__ == '__main__':
+    unittest.main()
