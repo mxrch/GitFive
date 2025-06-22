@@ -52,7 +52,7 @@ async def get_list(runner: GitfiveRunner):
     req = await runner.as_client.get(f"https://github.com/{runner.target.username}?tab=repositories")
 
     body = BeautifulSoup(req.text, 'html.parser')
-    total_repos = int(body.find("a", {"data-tab-item": "repositories"}).find("span", {"class": "Counter"}).attrs["title"])
+    total_repos = runner.target.nb_public_repos
 
     to_request = range(1, ceil(total_repos/30)+1)
 
