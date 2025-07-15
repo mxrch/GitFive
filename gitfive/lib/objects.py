@@ -262,7 +262,7 @@ class Credentials():
                 body = bs(req.text, 'html.parser')
                 authenticity_token = body.find("form", {"action": "/sessions/two-factor/mobile_poll"}).find("input", {"name": "authenticity_token"}).attrs["value"]
                 msg = body.find("p", {"data-target": "sudo-credential-options.githubMobileChallengeMessage"}).text.strip()
-                number = body.find("h1", {"data-target": "sudo-credential-options.githubMobileChallengeValue"}).text.strip()
+                number = body.find("h3", {"data-target": "sudo-credential-options.githubMobileChallengeValue"}).text.strip()
                 rprint(f'[bold]🗨️ Github :[/bold] [italic]"{msg}"')
                 rprint(f"[bold]🎲 Digits : {number}\n")
                 tmprinter.out("Waiting for user confirmation...")
