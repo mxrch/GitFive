@@ -19,7 +19,7 @@ async def get_follows(runner: GitfiveRunner, to_scrape: str):
     req = await runner.as_client.get(f"https://github.com/{runner.target.username}?tab={to_scrape}")
     body = BeautifulSoup(req.text, 'html.parser')
 
-    followers = body.find("a", href=f"/{runner.target.username}?tab={to_scrape}")
+    followers = body.find("a", href=f"https://github.com/{runner.target.username}?tab={to_scrape}")
     followers = int(followers.text.replace('k', '00').replace('.', '').split(' ')[0].strip('\n')) if followers else 0
     to_request = [0]+list(range(50, followers, 50))
     pages = [nb+1 for nb in range(len(to_request))]
