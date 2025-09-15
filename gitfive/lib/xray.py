@@ -74,8 +74,8 @@ def get_repo(token: str, target_username: str, target_id: int, repos_folder: Pat
                     # if username.lower() != target_username.lower(): # => https://github.com/mxrch/GitFive/issues/16
                     if not username in results["usernames_history"]:
                         results["usernames_history"][username] = {"names": {}}
+                    name = unicode_patch(entity.name)
                     if not entity.name in results["usernames_history"][username]["names"]:
-                        name = unicode_patch(entity.name)
                         results["usernames_history"][username]["names"][name] = {"repos": set()}
                     results["usernames_history"][username]["names"][name]["repos"].add(repo_id)
 
