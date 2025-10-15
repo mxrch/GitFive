@@ -4,6 +4,7 @@ import base64
 from pathlib import Path
 from time import sleep
 from datetime import datetime
+import re
 
 from rich.console import Console
 from rich import print as rprint
@@ -307,7 +308,11 @@ class Credentials():
                 req = await self._as_client.get("https://github.com/sessions/two-factor/app")
                 body = bs(req.text, 'html.parser')
                 authenticity_token = body.find("form", {"action": "/sessions/two-factor"}).find("input", {"name": "authenticity_token"}).attrs["value"]
-                msg = body.find("form", {"action": "/sessions/two-factor"}).find("div", {"class": "mt-3"}).text.strip().split("\n")[0]
+                twofa_form = body.find("form", attrs={"action": re.compile(r"/sessions/two-factor")})
+                if not twofa_form:
+                    twofa_form = body.find("form", id=re.compile(r"two-factor", re.I))
+                msg = (twofa_form.get_text(" ", strip=True) if twofa_form else "Two-factor challenge")
+
                 rprint(f'[bold]🗨️ Github :[/bold] [italic]"{msg}"')
                 otp = pwinput("📱 Code => ")
                 data = {
